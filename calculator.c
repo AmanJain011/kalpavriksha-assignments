@@ -4,7 +4,6 @@
 
 int numberStack[50];
 int nSTop = -1;
-
 int operatorStack[50];
 int opSTop = -1;
 
@@ -18,20 +17,15 @@ int main()
 {
     char exp[80];
     int result = 0;
-
-    printf("Enter Arithmetic Expression: ");
     fgets(exp, sizeof(exp), stdin);
     exp[strcspn(exp, "\n")] = '\0';
-
     if (strlen(exp) == 0)
     {
-        printf("Error: Empty expression.\n");
-        return 1;
+        printf("Error: Invalid expression.\n");
+        return 0;
     }
-
     result = evaluateExp(exp);
-    printf("Result: %d\n", result);
-
+    printf("%d\n", result);
     return 0;
 }
 
@@ -59,7 +53,7 @@ int evaluateExp(char exp[])
             i--;
             if (nSTop >= 49)
             {
-                printf("Error: Number stack overflow.\n");
+                printf("Error: Invalid expression.\n");
                 exit(0);
             }
             numberStack[++nSTop] = num;
@@ -72,18 +66,17 @@ int evaluateExp(char exp[])
             }
             if (opSTop >= 49)
             {
-                printf("Error: Operator stack overflow.\n");
+                printf("Error: Invalid expression.\n");
                 exit(0);
             }
             operatorStack[++opSTop] = ch;
         }
         else if (!custom_isspace(ch))
         {
-            printf("Error: Invalid character '%c' in the expression at position %d.\n", ch, i + 1);
+            printf("Error: Invalid expression.\n");
             exit(0);
         }
     }
-
     while (opSTop != -1)
     {
         calculate();
@@ -98,12 +91,10 @@ void calculate()
         printf("Error: Invalid expression.\n");
         exit(0);
     }
-
     int x = numberStack[nSTop--];
     int y = numberStack[nSTop--];
     char op = operatorStack[opSTop--];
     int z;
-
     switch (op)
     {
     case '+':
@@ -124,10 +115,9 @@ void calculate()
         z = y / x;
         break;
     default:
-        printf("Error: Invalid operator '%c'.\n", op);
+        printf("Error: Invalid expression.\n");
         exit(0);
     }
-
     numberStack[++nSTop] = z;
 }
 

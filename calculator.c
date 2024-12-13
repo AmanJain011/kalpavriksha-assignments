@@ -12,6 +12,7 @@ void calculate();
 int operatorPrecedence(char operator);
 int isDigit(char character);
 int isSpace(char character);
+void errorHandler(const char *errorMessage);
 
 int main()
 {
@@ -21,8 +22,7 @@ int main()
     expression[strcspn(expression, "\n")] = '\0';
     if (strlen(expression) == 0)
     {
-        printf("Error: Invalid expression.\n");
-        return 0;
+        errorHandler("Error: Invalid expression.\n");
     }
     result = evaluateExpression(expression);
     printf("%d\n", result);
@@ -53,8 +53,7 @@ int evaluateExpression(char expression[])
             index--;
             if (numberStackTop >= 49)
             {
-                printf("Error: Invalid expression.\n");
-                exit(0);
+                errorHandler("Error: Invalid expression.\n");
             }
             numberStack[++numberStackTop] = number;
         }
@@ -66,15 +65,13 @@ int evaluateExpression(char expression[])
             }
             if (operatorStackTop >= 49)
             {
-                printf("Error: Invalid expression.\n");
-                exit(0);
+                errorHandler("Error: Invalid expression.\n");
             }
             operatorStack[++operatorStackTop] = character;
         }
         else if (!isSpace(character))
         {
-            printf("Error: Invalid expression.\n");
-            exit(0);
+            errorHandler("Error: Invalid expression.\n");
         }
     }
     while (operatorStackTop != -1)
@@ -88,8 +85,7 @@ void calculate()
 {
     if (numberStackTop < 1 || operatorStackTop < 0)
     {
-        printf("Error: Invalid expression.\n");
-        exit(0);
+        errorHandler("Error: Invalid expression.\n");
     }
     int rightOperand = numberStack[numberStackTop--];
     int leftOperand = numberStack[numberStackTop--];
@@ -109,14 +105,12 @@ void calculate()
     case '/':
         if (rightOperand == 0)
         {
-            printf("Error: Division by zero.\n");
-            exit(0);
+            errorHandler("Error: Division by zero.\n");
         }
         result = leftOperand / rightOperand;
         break;
     default:
-        printf("Error: Invalid expression.\n");
-        exit(0);
+        errorHandler("Error: Invalid expression.\n");
     }
     numberStack[++numberStackTop] = result;
 }
@@ -138,4 +132,10 @@ int isDigit(char character)
 int isSpace(char character)
 {
     return character == ' ' || character == '\t';
+}
+
+void errorHandler(const char *errorMessage)
+{
+    printf("%s\n", errorMessage);
+    exit(EXIT_FAILURE);
 }

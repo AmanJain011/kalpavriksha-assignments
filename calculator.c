@@ -8,6 +8,8 @@ int operatorStack[50];
 int operatorStackTop = -1;
 
 int evaluateExpression(char expression[]);
+int processNumber(const char expression[], int index);
+void processOperator(char character);
 void calculate();
 int operatorPrecedence(char operator);
 int isDigit(char character);
@@ -36,49 +38,62 @@ int evaluateExpression(char expression[])
         char character = expression[index];
         if (isDigit(character))
         {
-            int number = 0;
-            while (isDigit(character))
-            {
-                number = number * 10 + (character - '0');
-                index++;
-                if (index < strlen(expression))
-                {
-                    character = expression[index];
-                }
-                else
-                {
-                    break;
-                }
-            }
-            index--;
-            if (numberStackTop >= 49)
-            {
-                errorHandler("Error: Invalid expression.\n");
-            }
-            numberStack[++numberStackTop] = number;
+            index = processNumber(expression, index);
         }
         else if (character == '+' || character == '-' || character == '/' || character == '*')
         {
-            while (operatorStackTop != -1 && operatorPrecedence(character) <= operatorPrecedence(operatorStack[operatorStackTop]))
-            {
-                calculate();
-            }
-            if (operatorStackTop >= 49)
-            {
-                errorHandler("Error: Invalid expression.\n");
-            }
-            operatorStack[++operatorStackTop] = character;
+            processOperator(character);
         }
         else if (!isSpace(character))
         {
             errorHandler("Error: Invalid expression.\n");
         }
     }
+    // Process Remaining Operators
     while (operatorStackTop != -1)
     {
         calculate();
     }
     return numberStack[numberStackTop];
+}
+
+int processNumber(const char expression[], int index)
+{
+    int number = 0;
+    char character = expression[index];
+    while (isDigit(character))
+    {
+        number = number * 10 + (character - '0');
+        index++;
+        if (index < strlen(expression))
+        {
+            character = expression[index];
+        }
+        else
+        {
+            break;
+        }
+    }
+    index--; // Step back since the loop increments `index` one extra time
+    if (numberStackTop >= 49)
+    {
+        errorHandler("Error: Stack overflow.\n");
+    }
+    numberStack[++numberStackTop] = number;
+    return index;
+}
+
+void processOperator(char character)
+{
+    while (operatorStackTop != -1 && operatorPrecedence(character) <= operatorPrecedence(operatorStack[operatorStackTop]))
+    {
+        calculate();
+    }
+    if (operatorStackTop >= 49)
+    {
+        errorHandler("Error: Stack overflow.\n");
+    }
+    operatorStack[++operatorStackTop] = character;
 }
 
 void calculate()

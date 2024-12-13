@@ -65,14 +65,7 @@ int processNumber(const char expression[], int index)
     {
         number = number * 10 + (character - '0');
         index++;
-        if (index < strlen(expression))
-        {
-            character = expression[index];
-        }
-        else
-        {
-            break;
-        }
+        character = expression[index];
     }
     index--; // Step back since the loop increments `index` one extra time
     if (numberStackTop >= 49)

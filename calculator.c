@@ -3,122 +3,122 @@
 #include <stdlib.h>
 
 int numberStack[50];
-int nSTop = -1;
+int numberStackTop = -1;
 int operatorStack[50];
-int opSTop = -1;
+int operatorStackTop = -1;
 
-int evaluateExp(char exp[]);
+int evaluateExpression(char expression[]);
 void calculate();
 int operatorPrecedence(char operator);
-int custom_isdigit(char ch);
-int custom_isspace(char ch);
+int isDigit(char character);
+int isSpace(char character);
 
 int main()
 {
-    char exp[80];
+    char expression[80];
     int result = 0;
-    fgets(exp, sizeof(exp), stdin);
-    exp[strcspn(exp, "\n")] = '\0';
-    if (strlen(exp) == 0)
+    fgets(expression, sizeof(expression), stdin);
+    expression[strcspn(expression, "\n")] = '\0';
+    if (strlen(expression) == 0)
     {
         printf("Error: Invalid expression.\n");
         return 0;
     }
-    result = evaluateExp(exp);
+    result = evaluateExpression(expression);
     printf("%d\n", result);
     return 0;
 }
 
-int evaluateExp(char exp[])
+int evaluateExpression(char expression[])
 {
-    for (int i = 0; i < strlen(exp); i++)
+    for (int index = 0; index < strlen(expression); index++)
     {
-        char ch = exp[i];
-        if (custom_isdigit(ch))
+        char character = expression[index];
+        if (isDigit(character))
         {
-            int num = 0;
-            while (custom_isdigit(ch))
+            int number = 0;
+            while (isDigit(character))
             {
-                num = num * 10 + (ch - '0');
-                i++;
-                if (i < strlen(exp))
+                number = number * 10 + (character - '0');
+                index++;
+                if (index < strlen(expression))
                 {
-                    ch = exp[i];
+                    character = expression[index];
                 }
                 else
                 {
                     break;
                 }
             }
-            i--;
-            if (nSTop >= 49)
+            index--;
+            if (numberStackTop >= 49)
             {
                 printf("Error: Invalid expression.\n");
                 exit(0);
             }
-            numberStack[++nSTop] = num;
+            numberStack[++numberStackTop] = number;
         }
-        else if (ch == '+' || ch == '-' || ch == '/' || ch == '*')
+        else if (character == '+' || character == '-' || character == '/' || character == '*')
         {
-            while (opSTop != -1 && operatorPrecedence(ch) <= operatorPrecedence(operatorStack[opSTop]))
+            while (operatorStackTop != -1 && operatorPrecedence(character) <= operatorPrecedence(operatorStack[operatorStackTop]))
             {
                 calculate();
             }
-            if (opSTop >= 49)
+            if (operatorStackTop >= 49)
             {
                 printf("Error: Invalid expression.\n");
                 exit(0);
             }
-            operatorStack[++opSTop] = ch;
+            operatorStack[++operatorStackTop] = character;
         }
-        else if (!custom_isspace(ch))
+        else if (!isSpace(character))
         {
             printf("Error: Invalid expression.\n");
             exit(0);
         }
     }
-    while (opSTop != -1)
+    while (operatorStackTop != -1)
     {
         calculate();
     }
-    return numberStack[nSTop];
+    return numberStack[numberStackTop];
 }
 
 void calculate()
 {
-    if (nSTop < 1 || opSTop < 0)
+    if (numberStackTop < 1 || operatorStackTop < 0)
     {
         printf("Error: Invalid expression.\n");
         exit(0);
     }
-    int x = numberStack[nSTop--];
-    int y = numberStack[nSTop--];
-    char op = operatorStack[opSTop--];
-    int z;
-    switch (op)
+    int rightOperand = numberStack[numberStackTop--];
+    int leftOperand = numberStack[numberStackTop--];
+    char operator= operatorStack[operatorStackTop--];
+    int result;
+    switch (operator)
     {
     case '+':
-        z = y + x;
+        result = leftOperand + rightOperand;
         break;
     case '-':
-        z = y - x;
+        result = leftOperand - rightOperand;
         break;
     case '*':
-        z = y * x;
+        result = leftOperand * rightOperand;
         break;
     case '/':
-        if (x == 0)
+        if (rightOperand == 0)
         {
             printf("Error: Division by zero.\n");
             exit(0);
         }
-        z = y / x;
+        result = leftOperand / rightOperand;
         break;
     default:
         printf("Error: Invalid expression.\n");
         exit(0);
     }
-    numberStack[++nSTop] = z;
+    numberStack[++numberStackTop] = result;
 }
 
 int operatorPrecedence(char operator)
@@ -130,12 +130,12 @@ int operatorPrecedence(char operator)
     return 0;
 }
 
-int custom_isdigit(char ch)
+int isDigit(char character)
 {
-    return ch >= '0' && ch <= '9';
+    return character >= '0' && character <= '9';
 }
 
-int custom_isspace(char ch)
+int isSpace(char character)
 {
-    return ch == ' ' || ch == '\t';
+    return character == ' ' || character == '\t';
 }

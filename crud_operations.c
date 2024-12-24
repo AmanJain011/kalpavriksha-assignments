@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #define FILENAME "users.txt"
 typedef struct {
   unsigned int id;
   char name[100];
-  unsigned char age;
+  int age;
 } User;
 
 unsigned int generateUniqueID();
@@ -14,41 +15,55 @@ void createNewUser();
 void displayAllUsers();
 void updateUserById();
 void deleteUserById();
+void displayMenu();
+int getChoiceFromUser();
+int getIntegerInput(const char *prompt, int min, int max);
+int updateFile(const char *oldFileName, const char *newFileName, int isUserFound);
 
 int main() {
   int choice;
 
   do {
-    printf("\n1. Create A New User.");
-    printf("\n2. Display All Users.");
-    printf("\n3. Update User By ID.");
-    printf("\n4. Delete User By ID.");
-    printf("\n5. Exit");
-    printf("\nEnter Your Choice: ");
-    scanf("%d", &choice);
+    displayMenu();
+    choice = getIntegerInput("Enter a Choice (1-5): ", 1, 5);
 
     switch (choice) {
-    case 1:
-      createNewUser();
-      break;
-    case 2:
-      displayAllUsers();
-      break;
-    case 3:
-      updateUserById();
-      break;
-    case 4:
-      deleteUserById();
-      break;
-    case 5:
-      break;
-    default:
-      printf("Invalid Number.\n");
-      break;
+      case 1:
+        createNewUser();
+        break;
+      case 2:
+        displayAllUsers();
+        break;
+      case 3:
+        updateUserById();
+        break;
+      case 4:
+        deleteUserById();
+        break;
     }
   } while (choice != 5);
 
   return 0;
+}
+
+int getIntegerInput(const char *prompt, int min, int max) {
+    int value;
+    printf("%s", prompt);
+    while (scanf("%d", &value) != 1 || value < min || value > max) {
+        printf("Invalid number. Please enter a valid number: ");
+        while (getchar() != '\n');
+    }
+    while (getchar() != '\n');
+    return value;
+}
+
+void displayMenu(){
+  printf("\n----------------------------");
+  printf("\n1. Create A New User.");
+  printf("\n2. Display All Users.");
+  printf("\n3. Update User By ID.");
+  printf("\n4. Delete User By ID.");
+  printf("\n5. Exit\n");
 }
 
 unsigned int generateUniqueID() {
@@ -56,7 +71,7 @@ unsigned int generateUniqueID() {
   FILE *file = fopen(FILENAME, "r");
   if (file) {
     User user;
-    while (fscanf(file, "%u|%[^|]|%hhu\n", &user.id, user.name, &user.age) == 3) {
+    while (fscanf(file, "%u|%[^|]|%d\n", &user.id, user.name, &user.age) == 3) {
       if (user.id > lastId)
         lastId = user.id;
     }
@@ -71,21 +86,13 @@ void createNewUser() {
   if (file == NULL) return;
 
   printf("Enter User's Name: ");
-  getchar();
   fgets(user.name, sizeof(user.name), stdin);
   user.name[strcspn(user.name, "\n")] = '\0';
-  printf("Enter User's Age: ");
-  int age;
-  scanf("%d", &age);
 
-  if (age > 255 || age < 0) {
-    fclose(file);
-    printf("\nAge should be between 0 to 255.\n");
-    return;
-  }
+  user.age = getIntegerInput("Enter User's Age (0-200): ", 0, 200);
 
   user.id = generateUniqueID();
-  fprintf(file, "%u|%s|%u\n", user.id, user.name, age);
+  fprintf(file, "%u|%s|%d\n", user.id, user.name, user.age);
   fclose(file);
   printf("User created successfully.\n");
 }
@@ -100,15 +107,33 @@ void displayAllUsers() {
   User user;
   printf("[\n");
   int first = 1;
-  while (fscanf(file, "%u|%[^|]|%hhu\n", &user.id, user.name, &user.age) == 3) {
+  while (fscanf(file, "%u|%[^|]|%d\n", &user.id, user.name, &user.age) == 3) {
     if (!first) {
         printf(",\n");
     }
-    printf("  {\n    \"id\": %u,\n    \"name\": \"%s\",\n    \"age\": %u\n  }", user.id, user.name, user.age);
+    printf("  {\n    \"id\": %u,\n    \"name\": \"%s\",\n    \"age\": %d\n  }", user.id, user.name, user.age);
     first = 0;
   }
   printf("\n]\n");
   fclose(file);
+}
+
+int updateFile(const char *oldFileName, const char *newFileName, int isUserFound) {
+  if (isUserFound) {
+    if (remove(oldFileName) != 0) {
+      perror("Error in removing old file");
+      return 0;
+    }
+    if (rename(newFileName, oldFileName) != 0) {
+      perror("Error in renaming new file");
+      return 0;
+    }
+    return 1;
+  } else {
+    remove(newFileName);
+    printf("User not found.\n");
+    return 0;
+  }
 }
 
 void updateUserById() {
@@ -119,35 +144,29 @@ void updateUserById() {
   }
 
   int id, isUserFound = 0;
-  printf("Enter the ID of the user to update: ");
-  scanf("%d", &id);
+  id = getIntegerInput("Enter the Id of the user to update: ", 0, INT_MAX);
 
   FILE *tempFile = fopen("temp.txt", "w");
   User user;
 
-  while (fscanf(file, "%u|%[^|]|%hhu\n", &user.id, user.name, &user.age) == 3) {
+  while (fscanf(file, "%u|%[^|]|%d\n", &user.id, user.name, &user.age) == 3) {
     if (user.id == id) {
       isUserFound = 1;
       printf("Enter new name for user: ");
-      getchar();
       fgets(user.name, sizeof(user.name), stdin);
       user.name[strcspn(user.name, "\n")] = '\0';
       printf("Enter new age for user: ");
-      scanf("%hhu", &user.age);
+      user.age = getIntegerInput("Enter new age for user (0-200): ", 0, 200);
     }
-    fprintf(tempFile, "%u|%s|%u\n", user.id, user.name, user.age);
+    fprintf(tempFile, "%u|%s|%d\n", user.id, user.name, user.age);
   }
 
   fclose(file);
   fclose(tempFile);
 
-  if (isUserFound) {
-    remove(FILENAME);
-    rename("temp.txt", FILENAME);
+  int status = updateFile(FILENAME, "temp.txt", isUserFound);
+  if(status){
     printf("User with ID %d updated successfully.\n", id);
-  } else {
-    remove("temp.txt");
-    printf("User not found with ID: %d.\n", id);
   }
 }
 
@@ -159,15 +178,14 @@ void deleteUserById() {
   }
 
   int id, isUserFound = 0;
-  printf("Enter the ID of the user to delete: ");
-  scanf("%d", &id);
+  id = getIntegerInput("Enter the ID of the user to delete: ", 0, INT_MAX);
 
   FILE *tempFile = fopen("temp.txt", "w");
   User user;
 
-  while (fscanf(file, "%u|%[^|]|%hhu\n", &user.id, user.name, &user.age) == 3) {
+  while (fscanf(file, "%u|%[^|]|%d\n", &user.id, user.name, &user.age) == 3) {
     if (user.id != id) {
-      fprintf(tempFile, "%u|%s|%u\n", user.id, user.name, user.age);
+      fprintf(tempFile, "%u|%s|%d\n", user.id, user.name, user.age);
     } else {
       isUserFound = 1;
     }
@@ -176,12 +194,8 @@ void deleteUserById() {
   fclose(file);
   fclose(tempFile);
 
-  if (isUserFound) {
-    remove(FILENAME);
-    rename("temp.txt", FILENAME);
+  int status = updateFile(FILENAME, "temp.txt", isUserFound);
+  if(status){
     printf("User with ID %d deleted successfully.\n", id);
-  } else {
-    remove("temp.txt");
-    printf("User not found with ID: %d.\n", id);
   }
 }

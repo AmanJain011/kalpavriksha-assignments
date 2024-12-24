@@ -16,7 +16,6 @@ void displayAllUsers();
 void updateUserById();
 void deleteUserById();
 void displayMenu();
-int getChoiceFromUser();
 int getIntegerInput(const char *prompt, int min, int max);
 int updateFile(const char *oldFileName, const char *newFileName, int isUserFound);
 

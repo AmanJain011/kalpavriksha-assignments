@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <unistd.h>
 
 #define FILENAME "users.txt"
 typedef struct {
@@ -18,6 +19,8 @@ void deleteUserById();
 void displayMenu();
 int getIntegerInput(const char *prompt, int min, int max);
 int updateFile(const char *oldFileName, const char *newFileName, int isUserFound);
+int removeFile(const char *fileName);
+int renameFile(const char *oldFileName, const char *newFIleName);
 
 int main() {
   int choice;
@@ -119,12 +122,12 @@ void displayAllUsers() {
 
 int updateFile(const char *oldFileName, const char *newFileName, int isUserFound) {
   if (isUserFound) {
-    if (remove(oldFileName) != 0) {
-      perror("Error in removing old file");
+    if (removeFile(oldFileName) != 0) {
+      printf("Error in removing old file");
       return 0;
     }
-    if (rename(newFileName, oldFileName) != 0) {
-      perror("Error in renaming new file");
+    if (renameFile(newFileName, oldFileName) != 0) {
+      printf("Error in renaming new file");
       return 0;
     }
     return 1;
@@ -197,4 +200,35 @@ void deleteUserById() {
   if(status){
     printf("User with ID %d deleted successfully.\n", id);
   }
+}
+
+int removeFile(const char *fileName){
+  if(unlink(fileName) != 0){
+    return 1;
+  }
+  return 0;
+}
+
+int renameFile(const char *oldFileName, const char *newFIleName) {
+  FILE *oldFile = fopen(oldFileName, "r");
+  FILE *newFile = fopen(newFIleName, "w");
+  if (oldFile == NULL || newFile == NULL) {
+    printf("Error: Failed to open files for copying.\n");
+    return 1;
+  }
+
+  int ch;
+  while ((ch = fgetc(oldFile)) != EOF) {
+    fputc(ch, newFile);
+  }
+
+  fclose(oldFile);
+  fclose(newFile);
+
+  if(removeFile(oldFileName)){
+    printf("Error in file removing.\n");
+    return 1;
+  };
+
+  return 0;
 }

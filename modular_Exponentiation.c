@@ -3,6 +3,7 @@
 void clearBuffer();
 int getIntegerInput(const char *prompt, int min);
 int compute(int base, int exponent, int mod);
+int shouldContinue();
 
 int main(){
     int base, exponent, mod, result;
@@ -16,6 +17,8 @@ int main(){
         result = compute(base, exponent, mod);
         printf("Result: %d\n", result);
         printf("<<----------------------------------------->>\n");
+
+        if (!shouldContinue()) break;
     }
     
     return 0;
@@ -43,12 +46,28 @@ int compute(int base, int exponent, int mod){
 
     while (exponent > 0){
         if(exponent & 1){
-            result = (int)((1LL * result * base) % mod);;
+            result = (int)((1LL * result * base) % mod);
         }
 
-        base = (int)((1LL * base * base) % mod);;
+        base = (int)((1LL * base * base) % mod);
         exponent >>= 1;
     }
     
     return result;
+}
+
+int shouldContinue() {
+    char choice;
+    while (1) {
+        printf("Continue? (y/n): ");
+        scanf(" %c", &choice);
+        clearBuffer();
+        if (choice == 'y' || choice == 'Y') {
+            return 1;
+        }
+        if (choice == 'n' || choice == 'N') {
+            return 0;
+        }
+        printf("Invalid choice. Please enter 'y' or 'n'.\n");
+    }
 }

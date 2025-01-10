@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 
 #define MAX_ROW_LENGTH 100
 #define MAX_COLUMN_LENGTH 100
@@ -144,8 +143,8 @@ void rotate90(int matrix[][MAX_COLUMN_LENGTH], int *rowCount, int *columnCount) 
 void rowWiseLeftRotation(int matrix[][MAX_COLUMN_LENGTH], int rowCount, int columnCount) {
     for (int row = 0; row < rowCount; row++) {
         int temp = matrix[row][0];
-        for (int col = 0; col < columnCount - 1; col++) {
-            matrix[row][col] = matrix[row][col + 1];
+        for (int column = 0; column < columnCount - 1; column++) {
+            matrix[row][column] = matrix[row][column + 1];
         }
         matrix[row][columnCount - 1] = temp;
     }
@@ -154,8 +153,8 @@ void rowWiseLeftRotation(int matrix[][MAX_COLUMN_LENGTH], int rowCount, int colu
 void rowWiseRightRotation(int matrix[][MAX_COLUMN_LENGTH], int rowCount, int columnCount) {
     for (int row = 0; row < rowCount; row++) {
         int temp = matrix[row][columnCount - 1];
-        for (int col = columnCount - 1; col > 0; col--) {
-            matrix[row][col] = matrix[row][col - 1];
+        for (int column = columnCount - 1; column > 0; column--) {
+            matrix[row][column] = matrix[row][column - 1];
         }
         matrix[row][0] = temp;
     }

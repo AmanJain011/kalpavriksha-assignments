@@ -25,8 +25,6 @@ void insertAtEnd(int value);
 void insertAtPosition(int position, int value);
 void display();
 void updateAtPosition(int position, int newValue);
-void updateAtBeginning(int newValue);
-void updateAtEnd(int newValue);
 void deleteAtBeginning();
 void deleteAtEnd();
 void deleteAtPosition(int position);
@@ -197,24 +195,6 @@ void updateAtPosition(int position, int newValue) {
     }
 
     tempNode->data = newValue;
-}
-
-void updateAtBeginning(int newValue) {
-    if (list->head == NULL) {
-        printf("Invalid position\n");
-        return;
-    }
-
-    list->head->data = newValue;
-}
-
-void updateAtEnd(int newValue) {
-    if (list->tail == NULL) {
-        printf("Invalid position\n");
-        return;
-    }
-
-    list->tail->data = newValue;
 }
 
 void deleteAtBeginning() {

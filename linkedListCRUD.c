@@ -19,6 +19,8 @@ LinkedList *list;
 
 #define MIN_OPERATIONS 1
 #define MAX_OPERATIONS 100
+#define MIN_DATA_VALUE -1000
+#define MAX_DATA_VALUE 1000
 
 void insertAtBeginning(int value);
 void insertAtEnd(int value);
@@ -29,6 +31,7 @@ void deleteAtBeginning();
 void deleteAtEnd();
 void deleteAtPosition(int position);
 void freeList();
+int isValueValid(int value);
 
 int main() {
     list = malloc(sizeof(LinkedList));
@@ -42,9 +45,8 @@ int main() {
     list->length = 0;
 
     int operationCount;
-    scanf("%d", &operationCount);
 
-    if (operationCount < MIN_OPERATIONS || operationCount > MAX_OPERATIONS) {
+    if (scanf("%d", &operationCount) != 1 || operationCount < MIN_OPERATIONS || operationCount > MAX_OPERATIONS) {
         printf("Invalid\n");
         free(list);
         return 0;
@@ -57,16 +59,28 @@ int main() {
         switch (choice) {
             case 1:
                 scanf("%d", &value);
+                if(!isValueValid(value)){
+                    printf("Invalid value\n");
+                    return 0;
+                }
                 insertAtEnd(value);
                 break;
 
             case 2:
                 scanf("%d", &value);
+                if(!isValueValid(value)){
+                    printf("Invalid value\n");
+                    return 0;
+                }
                 insertAtBeginning(value);
                 break;
 
             case 3:
                 scanf("%d %d", &position, &value);
+                if(!isValueValid(value)){
+                    printf("Invalid value\n");
+                    return 0;
+                }
                 insertAtPosition(position, value);
                 break;
 
@@ -76,6 +90,10 @@ int main() {
 
             case 5:
                 scanf("%d %d", &position, &value);
+                if(!isValueValid(value)){
+                    printf("Invalid value\n");
+                    return 0;
+                }
                 updateAtPosition(position, value);
                 break;
 
@@ -278,4 +296,8 @@ void freeList() {
     list->head = NULL;
     list->tail = NULL;
     list->length = 0;
+}
+
+int isValueValid(int value) {
+    return value >= MIN_DATA_VALUE && value <= MAX_DATA_VALUE;
 }

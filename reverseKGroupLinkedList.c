@@ -30,49 +30,74 @@ void insertNode(LinkedList *list, int data) {
     list->length++;
 }
 
-void addFirstNode(Node **tempHead, Node **tempTail, Node *node) {
-    if (*tempHead == NULL) {
-        *tempHead = node;
-        *tempTail = node;
-    } else {
-        node->next = *tempHead;
-        *tempHead = node;
+Node* reverseList(Node *node, int k) {
+    Node *current = node;
+    Node *next = NULL;
+    Node *previous = NULL;
+    int count = 0;
+
+    while (current != NULL && count < k) {
+        next = current->next;
+        current->next = previous;
+        previous = current;
+        current = next;
+        count++;
     }
+
+    if (node != NULL) {
+        node->next = current;
+    }
+
+    return previous;
 }
+
 
 void reverseKGroupLinkedList(LinkedList *list, int k) {
     if (k <= 1 || list->length < k) return;
 
     Node *current = list->head;
-    Node *forward = NULL;
-    Node *orignalHead = NULL;
-    Node *orignalTail = NULL;
+    Node *newHead = NULL;
+    Node *previousTail = NULL;
 
     while (current != NULL) {
-        Node *tempHead = NULL;
-        Node *tempTail = NULL;
-        int count = 0;
+        Node *segmentHead = current;
+        Node *segmentTail = current;
 
+        int count = 0;
         while (current != NULL && count < k) {
-            forward = current->next;
-            current->next = NULL;
-            addFirstNode(&tempHead, &tempTail, current);
-            current = forward;
+            current = current->next;
             count++;
         }
 
-        if (orignalHead == NULL) {
-            orignalHead = tempHead;
-            orignalTail = tempTail;
-        } else {
-            orignalTail->next = tempHead;
-            orignalTail = tempTail;
+        if (count < k) {
+            if (previousTail != NULL) {
+                previousTail->next = segmentHead;
+            }
+            break;
+        }
+
+        Node *reversedHead = reverseList(segmentHead, k);
+
+        if (newHead == NULL) {
+            newHead = reversedHead;
+        }
+        if (previousTail != NULL) {
+            previousTail->next = reversedHead;
+        }
+
+        previousTail = segmentTail;
+
+        count = 0;
+        while (current != NULL && count < k) {
+            previousTail = current;
+            current = current->next;
+            count++;
         }
     }
 
-    list->head = orignalHead;
-    list->tail = orignalTail;
+    list->head = newHead;
 }
+
 
 void printLinkedList(LinkedList *list) {
     Node *current = list->head;

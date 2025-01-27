@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int linearSearch(const int array[], int arraySize, int target) {
+int linearSearch(int array[], int arraySize, int target) {
     for (int index = 0; index < arraySize; index++) {
         if (array[index] == target) {
             return index;

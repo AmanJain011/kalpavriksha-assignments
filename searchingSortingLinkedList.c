@@ -11,42 +11,37 @@ typedef struct LinkedList {
     Node* tail;
 } LinkedList;
 
+Node* split(Node* head);
+Node* merge(Node* first, Node* second);
+Node* mergeSort(Node* head);
 Node* createNode(int value);
 void initLinkedList(LinkedList* list);
 void insertNode(LinkedList* list, int value);
 void printList(LinkedList* list);
-Node* mergeSort(Node* head);
-Node* merge(Node* left, Node* right);
-Node* getMiddle(Node* head);
-LinkedList* mergeLists(LinkedList* list1, LinkedList* list2);
 double findMedian(Node* head);
 void freeList(Node* head);
 
 int main() {
-    LinkedList list1, list2;
+    LinkedList list1, list2, mergedList;
     initLinkedList(&list1);
     initLinkedList(&list2);
+    initLinkedList(&mergedList);
 
     int data;
     char ch;
-    printf("Enter values for list1 (end with newline): ");
+    printf("Enter list1: ");
     while (scanf("%d", &data) == 1) {
         insertNode(&list1, data);
         scanf("%c", &ch);
-        if(ch == '\n') break;
+        if (ch == '\n') break;
     }
 
-    printf("Enter values for list2 (end with newline): ");
+    printf("Enter list2: ");
     while (scanf("%d", &data) == 1) {
         insertNode(&list2, data);
         scanf("%c", &ch);
-        if(ch == '\n') break;
+        if (ch == '\n') break;
     }
-
-    printf("List 1: ");
-    printList(&list1);
-    printf("List 2: ");
-    printList(&list2);
 
     list1.head = mergeSort(list1.head);
     list2.head = mergeSort(list2.head);
@@ -56,20 +51,59 @@ int main() {
     printf("Sorted List 2: ");
     printList(&list2);
 
-    LinkedList* mergedList = mergeLists(&list1, &list2);
+    mergedList.head = merge(list1.head, list2.head);
 
-    printf("Merged List: ");
-    printList(mergedList);
+    printf("Merged Sorted List: ");
+    printList(&mergedList);
 
-    double median = findMedian(mergedList->head);
+    double median = findMedian(mergedList.head);
     printf("Median: %.1f\n", median);
 
-    freeList(list1.head);
-    freeList(list2.head);
-    freeList(mergedList->head);
-    free(mergedList);
+    freeList(mergedList.head);
 
     return 0;
+}
+
+Node* split(Node* head) {
+    Node* fast = head;
+    Node* slow = head;
+
+    while (fast != NULL && fast->next != NULL) {
+        fast = fast->next->next;
+        if (fast != NULL) {
+            slow = slow->next;
+        }
+    }
+
+    Node* temp = slow->next;
+    slow->next = NULL;
+    return temp;
+}
+
+Node* merge(Node* first, Node* second) {
+    if (first == NULL) return second;
+    if (second == NULL) return first;
+
+    if (first->value < second->value) {
+        first->next = merge(first->next, second);
+        return first;
+    } else {
+        second->next = merge(first, second->next);
+        return second;
+    }
+}
+
+Node* mergeSort(Node* head) {
+    if (head == NULL || head->next == NULL) {
+        return head;
+    }
+
+    Node* second = split(head);
+
+    head = mergeSort(head);
+    second = mergeSort(second);
+
+    return merge(head, second);
 }
 
 Node* createNode(int value) {
@@ -104,100 +138,27 @@ void printList(LinkedList* list) {
     printf("NULL\n");
 }
 
-Node* mergeSort(Node* head) {
-    if (head == NULL || head->next == NULL) {
-        return head;
-    }
-
-    Node* midNode = getMiddle(head);
-    Node* secondHalf = midNode->next;
-    midNode->next = NULL;
-
-    Node* left = mergeSort(head);
-    Node* right = mergeSort(secondHalf);
-
-    return merge(left, right);
-}
-
-Node* merge(Node* left, Node* right) {
-    if (left == NULL) return right;
-    if (right == NULL) return left;
-
-    if (left->value < right->value) {
-        left->next = merge(left->next, right);
-        return left;
-    } else {
-        right->next = merge(left, right->next);
-        return right;
-    }
-}
-
-Node* getMiddle(Node* head) {
-    if (head == NULL) return head;
-
-    Node* slowPointer = head;
-    Node* fastPointer = head;
-
-    while (fastPointer != NULL && fastPointer->next != NULL) {
-        slowPointer = slowPointer->next;
-        fastPointer = fastPointer->next->next;
-    }
-
-    return slowPointer;
-}
-
-LinkedList* mergeLists(LinkedList* list1, LinkedList* list2) {
-    LinkedList* mergedList = (LinkedList*)malloc(sizeof(LinkedList));
-    initLinkedList(mergedList);
-
-    Node* currentList1 = list1->head;
-    Node* currentList2 = list2->head;
-    
-    while (currentList1 != NULL && currentList2 != NULL) {
-        if (currentList1->value < currentList2->value) {
-            insertNode(mergedList, currentList1->value);
-            currentList1 = currentList1->next;
-        } else {
-            insertNode(mergedList, currentList2->value);
-            currentList2 = currentList2->next;
-        }
-    }
-
-    while (currentList1 != NULL) {
-        insertNode(mergedList, currentList1->value);
-        currentList1 = currentList1->next;
-    }
-
-    while (currentList2 != NULL) {
-        insertNode(mergedList, currentList2->value);
-        currentList2 = currentList2->next;
-    }
-
-    return mergedList;
-}
-
 double findMedian(Node* head) {
-    Node* slowPointer = head;
-    Node* fastPointer = head;
-    int count = 0;
-
-    while (fastPointer != NULL) {
-        count++;
-        fastPointer = fastPointer->next;
+    if (head == NULL) {
+        return 0;
     }
 
-    fastPointer = head;
+    Node* slow = head;
+    Node* fast = head;
 
-    if (count % 2 == 0) {
-        for (int i = 0; i < count/2 - 1; i++) {
-            slowPointer = slowPointer->next;
+    while (fast != NULL && fast->next != NULL) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+
+    if (fast == NULL) {
+        Node* prev = head;
+        while (prev->next != slow) {
+            prev = prev->next;
         }
-        return (slowPointer->value + slowPointer->next->value) / 2.0;
+        return (prev->value + slow->value) / 2.0;
     } else {
-        for (int i = 0; i < count/2; i++) {
-            slowPointer = slowPointer->next;
-        }
-        return slowPointer->value;
+        return slow->value;
     }
 }
 

@@ -3,23 +3,23 @@
 #include <string.h>
 
 typedef struct Node{
-    int data;
+    int id;
     char *severityLevel;
     struct Node *next;
 } Node;
 
-Node* createNode(int data, char *severityLevel){
+Node* createNode(int id, char *severityLevel){
     Node *node = (Node *)malloc(sizeof(Node));
     node->severityLevel = (char *)malloc(sizeof(char)*10);
 
-    node->data = data;
+    node->id = id;
     node->severityLevel = severityLevel;
     node->next = NULL;
     return node;
 }
 
-void insertNode(Node **head, int data, char *severityLevel){
-    Node* newNode = createNode(data, severityLevel);
+void insertNode(Node **head, int id, char *severityLevel){
+    Node* newNode = createNode(id, severityLevel);
 
     if(*head == NULL){
         *head = newNode;
@@ -37,15 +37,15 @@ void insertNode(Node **head, int data, char *severityLevel){
 void printList(Node *head){
     Node *temp = head;
     while (temp != NULL){
-        printf("%d %s\n", temp->data, temp->severityLevel);
+        printf("{%d %s} -> ", temp->id, temp->severityLevel);
         temp = temp->next;
     }
+    printf("NULL\n");
 }
 
-int getIndex(Node *temp, char* levels[]){
+int getIndex(char* severityLevel, char* levels[]){
     for(int i=0; i<3; i++){
-        if(!strcmp(temp->severityLevel, levels[i])){
-            printf("%d ", i);
+        if(!strcmp(severityLevel, levels[i])){
             return i;
         }
     }
@@ -58,7 +58,7 @@ Node *getMid(Node *head){
     Node *slow = head;
     Node *fast = head;
 
-    while (fast->next != NULL){
+    while (fast->next != NULL && fast->next->next != NULL){
         slow = slow->next;
         fast = fast->next->next;
     }
@@ -75,10 +75,8 @@ Node* mergeSortedList(Node *l1, Node *l2, char* levels[]){
     Node *dummy = createNode(-1, "dummy");
     Node *prev = dummy;
 
-    printf("Running\n");
-
     while (c1 != NULL && c2 != NULL){
-        if(getIndex(c1, levels) < getIndex(c2, levels)){
+        if(getIndex(c1->severityLevel, levels) <= getIndex(c2->severityLevel, levels)){
             prev->next = c1;
             c1 = c1->next;
         }else{
@@ -99,32 +97,49 @@ Node* mergeSort(Node *head, char* levels[]){
     Node *midNode = getMid(head);
     Node *newHead = midNode->next;
     midNode->next = NULL;
-    Node *temp = head;
 
-    Node* l1 = mergeSort(temp, levels);
+    Node* l1 = mergeSort(head, levels);
     Node* l2 = mergeSort(newHead, levels);
 
     return mergeSortedList(l1, l2, levels);
 }
 
 
+int isIdPresent(Node* head, int id){
+    Node *temp = head;
+    while (temp != NULL){
+        if(temp->id == id){
+            printf("Id Already Present\n");
+            return 1;
+        }
+        temp = temp->next;
+    }
+    
+    return 0;
+}
+
 int main(){
-    int k, data;
+    int k, id;
     scanf("%d", &k);
     
     Node *head = NULL;
-    for(int i=0; i<k; i++){
-        char* severityLevel = (char *)malloc(sizeof(char)*10);
-        scanf("%d %s", &data, severityLevel);
-        insertNode(&head, data, severityLevel);
+
+    char* levels[3] = {"Critical", "Serious", "Stable"};
+    while (k){
+        char* severityLevel = (char *)malloc(sizeof(char)*20);
+        scanf("%d %s", &id, severityLevel);
+        if(getIndex(severityLevel, levels) == -1 || isIdPresent(head, id)){
+            printf("Invalid Input\n");
+            continue;
+        }
+
+        insertNode(&head, id, severityLevel);
+        k--;
     }
 
-    char* levels[] = {"Critical", "Serious", "Stable"};
-
-    printList(head);
-
     head = mergeSort(head, levels);
-     
+    printf("\nSorted List:\n");
     printList(head);
+
     return 0;
 }

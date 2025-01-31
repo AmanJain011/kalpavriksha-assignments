@@ -177,33 +177,23 @@ bool enqueue(Queue *queue, int data){
 }
 
 int dequeue(Queue *queue){
-    if(isEmpty(queue)) return INT_MIN;
-    if(size(queue) == 1) return pop(queue->stack);
-
-    Node *temp = queue->stack->top;
-    while (temp->next->next != NULL){
-        temp = temp->next;
-    }
+    if(stackSize(queue->stack) == 1) return pop(queue->stack);
     
-    Node *nodeToDelete = temp->next;
-    int deletedValue = nodeToDelete->data;
-    temp->next = NULL;
-    free(nodeToDelete);
-    queue->stack->size -= 1;
+    int data = pop(queue->stack);
+    int bottomSoFar = dequeue(queue);
+    push(queue->stack, data);
 
-    return deletedValue;
+    return bottomSoFar;
 }
 
 int peek(Queue *queue){
-    if(isEmpty(queue)) return INT_MIN;
-    if(size(queue) == 1) return peekStack(queue->stack);
+    if(stackSize(queue->stack) == 1) return peekStack(queue->stack);
+    
+    int data = pop(queue->stack);
+    int bottomSoFar = peek(queue);
+    push(queue->stack, data);
 
-    Node *temp = queue->stack->top;
-    while (temp->next != NULL){
-        temp = temp->next;
-    }
-
-    return temp->data;
+    return bottomSoFar;
 }
 
 bool isEmpty(Queue *queue){
